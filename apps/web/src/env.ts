@@ -19,61 +19,61 @@ export const env = createEnv({
     SUPABASE_URL: z.string().url().optional(),
     SUPABASE_ANON_KEY: z.string().optional(),
 
-    RESEND_API_KEY: z.string(),
+    RESEND_API_KEY: z.string().optional().default("not_configured"),
 
     BETTER_AUTH_SECRET: z.string(),
     BETTER_AUTH_URL: z.string().url(),
 
-    QSTASH_URL: z.string().url(),
-    QSTASH_TOKEN: z.string(),
-    QSTASH_CURRENT_SIGNING_KEY: z.string(),
-    QSTASH_NEXT_SIGNING_KEY: z.string(),
+    QSTASH_URL: z.string().url().optional().default("https://qstash.upstash.io"),
+    QSTASH_TOKEN: z.string().optional().default("not_configured"),
+    QSTASH_CURRENT_SIGNING_KEY: z.string().optional().default("not_configured"),
+    QSTASH_NEXT_SIGNING_KEY: z.string().optional().default("not_configured"),
 
-    DEFAULT_OPENAI_API_KEY: z.string(),
+    DEFAULT_OPENAI_API_KEY: z.string().optional().default("not_configured"),
     DEFAULT_OPENAI_MODEL: z.string().optional().default("gpt-4"),
     DEFAULT_OPENAI_EMBEDDING_MODEL: z.string().optional().default("text-embedding-3-large"),
 
-    DEFAULT_PINECONE_API_KEY: z.string(),
-    DEFAULT_PINECONE_HOST: z.string().url(),
+    DEFAULT_PINECONE_API_KEY: z.string().optional().default("not_configured"),
+    DEFAULT_PINECONE_HOST: z.string().optional().default("not_configured"),
 
     SECONDARY_PINECONE_API_KEY: z.string().optional(),
     SECONDARY_PINECONE_HOST: z.string().url().optional(),
 
-    GITHUB_CLIENT_ID: z.string(),
-    GITHUB_CLIENT_SECRET: z.string(),
+    GITHUB_CLIENT_ID: z.string().optional().default("not_configured"),
+    GITHUB_CLIENT_SECRET: z.string().optional().default("not_configured"),
 
-    GOOGLE_CLIENT_ID: z.string(),
-    GOOGLE_CLIENT_SECRET: z.string(),
+    GOOGLE_CLIENT_ID: z.string().optional().default("not_configured"),
+    GOOGLE_CLIENT_SECRET: z.string().optional().default("not_configured"),
 
-    PARTITION_API_KEY: z.string(),
-    PARTITION_API_URL: z.string().url(),
+    PARTITION_API_KEY: z.string().optional().default("not_configured"),
+    PARTITION_API_URL: z.string().url().optional().default("https://api.unstructuredapp.io"),
 
-    DEFAULT_COHERE_API_KEY: z.string(),
+    DEFAULT_COHERE_API_KEY: z.string().optional().default("not_configured"),
 
-    UPLOADTHING_TOKEN: z.string(),
-    UPLOADTHING_APP_ID: z.string(),
+    UPLOADTHING_TOKEN: z.string().optional().default("not_configured"),
+    UPLOADTHING_APP_ID: z.string().optional().default("not_configured"),
 
-    ASSETS_UPLOADTHING_TOKEN: z.string(),
-    ASSETS_UPLOADTHING_APP_ID: z.string(),
-    ASSETS_UPLOADTHING_URL: z.string().url(),
+    ASSETS_UPLOADTHING_TOKEN: z.string().optional().default("not_configured"),
+    ASSETS_UPLOADTHING_APP_ID: z.string().optional().default("not_configured"),
+    ASSETS_UPLOADTHING_URL: z.string().url().optional().default("https://utfs.io/f/"),
 
-    REDIS_URL: z.string().url(),
-    REDIS_TOKEN: z.string(),
+    REDIS_URL: z.string().optional().default("not_configured"),
+    REDIS_TOKEN: z.string().optional().default("not_configured"),
 
-    STRIPE_API_KEY: z.string(),
-    STRIPE_WEBHOOK_SECRET: z.string(),
+    STRIPE_API_KEY: z.string().optional().default("not_configured"),
+    STRIPE_WEBHOOK_SECRET: z.string().optional().default("not_configured"),
 
     DISCORD_HOOK_ALERTS: z.string().url().optional(),
     DISCORD_HOOK_CRON: z.string().url().optional(),
     DISCORD_HOOK_SUBSCRIBERS: z.string().url().optional(),
     DISCORD_HOOK_ERRORS: z.string().url().optional(),
 
-    VERCEL_PROJECT_ID: z.string(),
-    VERCEL_TEAM_ID: z.string(),
-    VERCEL_API_TOKEN: z.string(),
+    VERCEL_PROJECT_ID: z.string().optional().default("not_configured"),
+    VERCEL_TEAM_ID: z.string().optional().default("not_configured"),
+    VERCEL_API_TOKEN: z.string().optional().default("not_configured"),
   },
   client: {
-    NEXT_PUBLIC_STRIPE_PUBLIC_KEY: z.string(),
+    NEXT_PUBLIC_STRIPE_PUBLIC_KEY: z.string().optional().default("not_configured"),
   },
   runtimeEnv: {
     NEXT_PUBLIC_APP_NAME: process.env.NEXT_PUBLIC_APP_NAME,

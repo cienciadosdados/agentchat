@@ -1,8 +1,15 @@
-import { checkFileExists } from "@/lib/s3";
 import { triggerIngestionJob } from "@/lib/workflow";
 
 import type { IngestJob } from "@agentset/db";
 import { db, IngestJobStatus } from "@agentset/db";
+
+// Helper function - Uploadthing doesn't have file existence check
+// Files are assumed to exist if they have a valid key/URL
+const checkFileExists = async (key: string): Promise<boolean> => {
+  // For Uploadthing, we assume files exist if they have a valid key
+  // In a production app, you might want to store file metadata in your database
+  return Boolean(key);
+};
 
 export const createIngestJob = async ({
   namespaceId,

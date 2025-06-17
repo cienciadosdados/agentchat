@@ -1,12 +1,12 @@
 import type { DeleteDocumentBody } from "@/lib/workflow";
+import { env } from "@/env";
+import { deleteFile } from "@/lib/uploadthing/server";
+import { db, DocumentStatus } from "@agentset/db";
 import { chunkArray } from "@/lib/functions";
 import { KeywordStore } from "@/lib/keyword-store";
-import { deleteObject } from "@/lib/s3";
 import { getNamespaceVectorStore } from "@/lib/vector-store";
 import { cancelWorkflow, qstashClient, qstashReceiver } from "@/lib/workflow";
 import { serve } from "@upstash/workflow/nextjs";
-
-import { db, DocumentStatus } from "@agentset/db";
 
 const BATCH_SIZE = 30;
 
@@ -174,7 +174,7 @@ export const { POST } = serve<DeleteDocumentBody>(
 
     await context.run("check-and-delete-managed-file", async () => {
       if (document.source.type === "MANAGED_FILE") {
-        await deleteObject(document.source.key);
+        await deleteFile(document.source.key);
       }
     });
 

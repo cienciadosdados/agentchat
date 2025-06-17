@@ -29,22 +29,15 @@ export const env = createEnv({
     QSTASH_CURRENT_SIGNING_KEY: z.string(),
     QSTASH_NEXT_SIGNING_KEY: z.string(),
 
+    DEFAULT_OPENAI_API_KEY: z.string(),
+    DEFAULT_OPENAI_MODEL: z.string().optional().default("gpt-4"),
+    DEFAULT_OPENAI_EMBEDDING_MODEL: z.string().optional().default("text-embedding-3-large"),
+
     DEFAULT_PINECONE_API_KEY: z.string(),
     DEFAULT_PINECONE_HOST: z.string().url(),
 
     SECONDARY_PINECONE_API_KEY: z.string().optional(),
     SECONDARY_PINECONE_HOST: z.string().url().optional(),
-
-    AZURE_SEARCH_URL: z.string().url(),
-    AZURE_SEARCH_INDEX: z.string(),
-    AZURE_SEARCH_KEY: z.string(),
-
-    DEFAULT_AZURE_BASE_URL: z.string().url(),
-    DEFAULT_AZURE_API_KEY: z.string(),
-    DEFAULT_AZURE_TEXT_3_LARGE_EMBEDDING_DEPLOYMENT: z.string(),
-    DEFAULT_AZURE_TEXT_3_LARGE_EMBEDDING_VERSION: z.string().optional(),
-    DEFAULT_AZURE_GPT_4_1_DEPLOYMENT: z.string(),
-    DEFAULT_AZURE_GPT_4_1_VERSION: z.string().optional(),
 
     GITHUB_CLIENT_ID: z.string(),
     GITHUB_CLIENT_SECRET: z.string(),
@@ -57,16 +50,12 @@ export const env = createEnv({
 
     DEFAULT_COHERE_API_KEY: z.string(),
 
-    S3_ACCESS_KEY: z.string(),
-    S3_SECRET_KEY: z.string(),
-    S3_ENDPOINT: z.string().url(),
-    S3_BUCKET: z.string(),
+    UPLOADTHING_TOKEN: z.string(),
+    UPLOADTHING_APP_ID: z.string(),
 
-    ASSETS_S3_ACCESS_KEY: z.string(),
-    ASSETS_S3_SECRET_KEY: z.string(),
-    ASSETS_S3_ENDPOINT: z.string().url(),
-    ASSETS_S3_BUCKET: z.string(),
-    ASSETS_S3_URL: z.string().url(),
+    ASSETS_UPLOADTHING_TOKEN: z.string(),
+    ASSETS_UPLOADTHING_APP_ID: z.string(),
+    ASSETS_UPLOADTHING_URL: z.string().url(),
 
     REDIS_URL: z.string().url(),
     REDIS_TOKEN: z.string(),
@@ -106,25 +95,15 @@ export const env = createEnv({
     QSTASH_CURRENT_SIGNING_KEY: process.env.QSTASH_CURRENT_SIGNING_KEY,
     QSTASH_NEXT_SIGNING_KEY: process.env.QSTASH_NEXT_SIGNING_KEY,
 
+    DEFAULT_OPENAI_API_KEY: process.env.DEFAULT_OPENAI_API_KEY,
+    DEFAULT_OPENAI_MODEL: process.env.DEFAULT_OPENAI_MODEL,
+    DEFAULT_OPENAI_EMBEDDING_MODEL: process.env.DEFAULT_OPENAI_EMBEDDING_MODEL,
+
     DEFAULT_PINECONE_API_KEY: process.env.DEFAULT_PINECONE_API_KEY,
     DEFAULT_PINECONE_HOST: process.env.DEFAULT_PINECONE_HOST,
 
     SECONDARY_PINECONE_API_KEY: process.env.SECONDARY_PINECONE_API_KEY,
     SECONDARY_PINECONE_HOST: process.env.SECONDARY_PINECONE_HOST,
-
-    AZURE_SEARCH_URL: process.env.AZURE_SEARCH_URL,
-    AZURE_SEARCH_INDEX: process.env.AZURE_SEARCH_INDEX,
-    AZURE_SEARCH_KEY: process.env.AZURE_SEARCH_KEY,
-
-    DEFAULT_AZURE_BASE_URL: process.env.DEFAULT_AZURE_BASE_URL,
-    DEFAULT_AZURE_API_KEY: process.env.DEFAULT_AZURE_API_KEY,
-    DEFAULT_AZURE_TEXT_3_LARGE_EMBEDDING_DEPLOYMENT:
-      process.env.DEFAULT_AZURE_TEXT_3_LARGE_EMBEDDING_DEPLOYMENT,
-    DEFAULT_AZURE_TEXT_3_LARGE_EMBEDDING_VERSION:
-      process.env.DEFAULT_AZURE_TEXT_3_LARGE_EMBEDDING_VERSION,
-    DEFAULT_AZURE_GPT_4_1_DEPLOYMENT:
-      process.env.DEFAULT_AZURE_GPT_4_1_DEPLOYMENT,
-    DEFAULT_AZURE_GPT_4_1_VERSION: process.env.DEFAULT_AZURE_GPT_4_1_VERSION,
 
     GITHUB_CLIENT_ID: process.env.GITHUB_CLIENT_ID,
     GITHUB_CLIENT_SECRET: process.env.GITHUB_CLIENT_SECRET,
@@ -137,16 +116,12 @@ export const env = createEnv({
 
     DEFAULT_COHERE_API_KEY: process.env.DEFAULT_COHERE_API_KEY,
 
-    S3_ACCESS_KEY: process.env.S3_ACCESS_KEY,
-    S3_SECRET_KEY: process.env.S3_SECRET_KEY,
-    S3_ENDPOINT: process.env.S3_ENDPOINT,
-    S3_BUCKET: process.env.S3_BUCKET,
+    UPLOADTHING_TOKEN: process.env.UPLOADTHING_TOKEN,
+    UPLOADTHING_APP_ID: process.env.UPLOADTHING_APP_ID,
 
-    ASSETS_S3_ACCESS_KEY: process.env.ASSETS_S3_ACCESS_KEY,
-    ASSETS_S3_SECRET_KEY: process.env.ASSETS_S3_SECRET_KEY,
-    ASSETS_S3_ENDPOINT: process.env.ASSETS_S3_ENDPOINT,
-    ASSETS_S3_BUCKET: process.env.ASSETS_S3_BUCKET,
-    ASSETS_S3_URL: process.env.ASSETS_S3_URL,
+    ASSETS_UPLOADTHING_TOKEN: process.env.ASSETS_UPLOADTHING_TOKEN,
+    ASSETS_UPLOADTHING_APP_ID: process.env.ASSETS_UPLOADTHING_APP_ID,
+    ASSETS_UPLOADTHING_URL: process.env.ASSETS_UPLOADTHING_URL,
 
     REDIS_URL: process.env.REDIS_URL,
     REDIS_TOKEN: process.env.REDIS_TOKEN,

@@ -40,7 +40,7 @@ export const base64ImageSchema = z
   )
   .transform((v) => v || null);
 
-// Base64 encoded image or S3_URL
+// Base64 encoded image or Uploadthing URL
 // This schema contains an async refinement check for base64 image validation,
 // which requires using parseAsync() instead of parse() when validating
 export const uploadedImageSchema = z
@@ -50,8 +50,8 @@ export const uploadedImageSchema = z
       .string()
       .url()
       .trim()
-      .refine((url) => url.startsWith(env.ASSETS_S3_URL), {
-        message: `URL must start with ${env.ASSETS_S3_URL}`,
+      .refine((url) => url.startsWith(env.ASSETS_UPLOADTHING_URL), {
+        message: `URL must start with ${env.ASSETS_UPLOADTHING_URL}`,
       }),
   ])
   .transform((v) => v || null);

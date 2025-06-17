@@ -1,8 +1,22 @@
 import { v4 as uuidv4 } from "uuid";
 
-import type { Document, IngestJob, Namespace } from "@agentset/db";
+import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
+import { Document as LangchainDocument } from "@langchain/core/documents";
 
-import { presignGetUrl } from "./s3";
+import type { Document, IngestJob, Namespace } from "@agentset/db";
+import { env } from "~/env";
+import { getKeyFromUrl } from "./uploadthing/server";
+
+// Helper function to replace presignGetUrl from S3
+// Uploadthing URLs are already public and don't need presigning
+const presignGetUrl = async (key: string): Promise<string> => {
+  // Uploadthing files are publicly accessible via their URL
+  // If key is already a full URL, return it; otherwise construct the URL
+  if (key.startsWith('http')) {
+    return key;
+  }
+  return `https://utfs.io/f/${key}`;
+};
 
 export interface PartitionBody {
   // one of url or text is required
@@ -49,7 +63,7 @@ export const getPartitionDocumentBody = async (
     }
     case "MANAGED_FILE": {
       const url = await presignGetUrl(document.source.key);
-      body.url = url.url;
+      body.url = url;
       body.filename = document.name || document.id;
       break;
     }

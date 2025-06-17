@@ -1,7 +1,10 @@
-import { NextRequest } from "next/server";
+import type { NextRequest } from "next/server";
 import { makeAuth } from "@/lib/auth";
 import { HOSTING_PREFIX } from "@/lib/constants";
 import { toNextJsHandler } from "better-auth/next-js";
+
+// Force Node.js runtime instead of Edge
+export const runtime = 'nodejs';
 
 export const { POST, GET } = toNextJsHandler((_req) => {
   const req = _req as NextRequest;

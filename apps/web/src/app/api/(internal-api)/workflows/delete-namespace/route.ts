@@ -1,15 +1,16 @@
 import type { DeleteNamespaceBody } from "@/lib/workflow";
 import { env } from "@/env";
+import { deleteAsset } from "@/lib/uploadthing/server";
 import { chunkArray } from "@/lib/functions";
-import { deleteAsset } from "@/lib/s3/assets";
-import {
+import { db } from "@agentset/db";
+import { 
   qstashClient,
   qstashReceiver,
   triggerDeleteIngestJob,
 } from "@/lib/workflow";
 import { serve } from "@upstash/workflow/nextjs";
 
-import { db } from "@agentset/db";
+import { NextRequest, NextResponse } from "next/server";
 
 const BATCH_SIZE = 30;
 export const { POST } = serve<DeleteNamespaceBody>(
@@ -40,7 +41,7 @@ export const { POST } = serve<DeleteNamespaceBody>(
     const logo = namespace.hosting?.logo;
     if (logo) {
       await context.run("delete-hosting-logo", async () => {
-        await deleteAsset(logo.replace(`${env.ASSETS_S3_URL}/`, ""));
+        await deleteAsset(logo.replace(`${env.ASSETS_UPLOADTHING_URL}/`, ""));
       });
     }
 

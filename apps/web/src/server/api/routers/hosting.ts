@@ -2,12 +2,14 @@ import type { ProtectedProcedureContext } from "@/server/api/trpc";
 import { env } from "@/env";
 import { prefixId } from "@/lib/api/ids";
 import { DEFAULT_SYSTEM_PROMPT } from "@/lib/prompts";
-import { deleteAsset, uploadImage } from "@/lib/s3/assets";
-import z from "@/lib/zod";
-import { slugSchema, uploadedImageSchema } from "@/schemas/api/misc";
+import { tryCatch } from "@/lib/error";
+import { deleteAsset, uploadAsset } from "@/lib/uploadthing/server";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import { TRPCError } from "@trpc/server";
-import { waitUntil } from "@vercel/functions";
+import { z } from "zod";
+
+import { getNamespaceByUser } from "../auth";
+
 import { nanoid } from "nanoid";
 
 import { Prisma } from "@agentset/db";
@@ -15,6 +17,13 @@ import { Prisma } from "@agentset/db";
 const commonInput = z.object({
   namespaceId: z.string(),
 });
+
+// Helper function to replace uploadImage from S3
+const uploadImage = async (buffer: Buffer, key: string, contentType: string) => {
+  // Convert buffer to File for Uploadthing
+  const file = new File([buffer], key, { type: contentType });
+  return await uploadAsset(file);
+};
 
 const getHosting = async (
   ctx: ProtectedProcedureContext,
@@ -100,8 +109,8 @@ export const hostingRouter = createTRPCRouter({
     .input(
       commonInput.extend({
         title: z.string().min(1).optional(),
-        slug: slugSchema.optional(),
-        logo: uploadedImageSchema.nullish(),
+        slug: z.string().min(1).optional(),
+        logo: z.instanceof(Blob).nullish(),
         protected: z.boolean().optional(),
         allowedEmails: z
           .array(z.string().email().trim().toLowerCase())
@@ -129,8 +138,9 @@ export const hostingRouter = createTRPCRouter({
 
       const newLogo = input.logo
         ? await uploadImage(
+            Buffer.from(await input.logo.arrayBuffer()),
             `namespaces/${prefixId(hosting.namespaceId, "ns_")}/hosting/logo_${nanoid(7)}`,
-            input.logo,
+            input.logo.type,
           )
         : input.logo === null
           ? null
@@ -161,9 +171,7 @@ export const hostingRouter = createTRPCRouter({
 
         // Delete old logo if it exists
         if ((newLogo || newLogo === null) && hosting.logo) {
-          waitUntil(
-            deleteAsset(hosting.logo.replace(`${env.ASSETS_S3_URL}/`, "")),
-          );
+          await deleteAsset(hosting.logo.replace(`${env.ASSETS_UPLOADTHING_URL}/`, ""));
         }
 
         return updatedHosting;

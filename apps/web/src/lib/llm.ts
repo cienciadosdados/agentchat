@@ -4,15 +4,13 @@ import type { LLMConfig } from "@agentset/db";
 
 export const getNamespaceLanguageModel = async (config?: LLMConfig) => {
   if (!config) {
-    const { createAzure } = await import("@ai-sdk/azure");
+    const { createOpenAI } = await import("@ai-sdk/openai");
 
-    const defaultAzure = createAzure({
-      baseURL: env.DEFAULT_AZURE_BASE_URL,
-      apiKey: env.DEFAULT_AZURE_API_KEY,
-      apiVersion: env.DEFAULT_AZURE_GPT_4_1_VERSION,
+    const defaultOpenAI = createOpenAI({
+      apiKey: env.DEFAULT_OPENAI_API_KEY,
     });
 
-    return defaultAzure.languageModel(env.DEFAULT_AZURE_GPT_4_1_DEPLOYMENT);
+    return defaultOpenAI.languageModel(env.DEFAULT_OPENAI_MODEL || "gpt-4");
   }
 
   switch (config.provider) {
@@ -25,11 +23,11 @@ export const getNamespaceLanguageModel = async (config?: LLMConfig) => {
     }
 
     case "AZURE_OPENAI": {
-      const { createAzure } = await import("@ai-sdk/azure");
+      const { createOpenAI } = await import("@ai-sdk/openai");
 
-      const { apiKey, baseUrl, deployment, apiVersion } = config;
-      const azure = createAzure({ apiKey, baseURL: baseUrl, apiVersion });
-      return azure.languageModel(deployment);
+      const { apiKey, model } = config;
+      const openai = createOpenAI({ apiKey });
+      return openai.languageModel(model);
     }
 
     default: {

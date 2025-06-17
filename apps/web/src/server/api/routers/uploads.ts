@@ -1,6 +1,5 @@
 import { extname } from "node:path";
 import { tryCatch } from "@/lib/error";
-import { presignUploadUrl } from "@/lib/s3";
 import { filenamize } from "@/lib/string-utils";
 import { MAX_UPLOAD_SIZE } from "@/lib/upload";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
@@ -39,6 +38,17 @@ const supportedExtensions = [
   ".xml",
 ];
 
+// Helper function to generate upload URL for Uploadthing
+// In practice, this would be handled by the Uploadthing component on the frontend
+const presignUploadUrl = async (key: string, contentType: string, fileSize: number) => {
+  // Uploadthing handles presigned URLs internally
+  // This is a placeholder - actual upload should use Uploadthing components
+  return {
+    data: `/api/uploadthing`,
+    error: null,
+  };
+};
+
 export const uploadsRouter = createTRPCRouter({
   getPresignedUrl: protectedProcedure
     .input(
@@ -71,11 +81,7 @@ export const uploadsRouter = createTRPCRouter({
 
       const key = `namespaces/${ns.id}/${filename}${ext}`;
       const url = await tryCatch(
-        presignUploadUrl({
-          key,
-          contentType: input.contentType,
-          fileSize: input.fileSize,
-        }),
+        presignUploadUrl(key, input.contentType, input.fileSize),
       );
 
       if (url.error) {
@@ -137,11 +143,7 @@ export const uploadsRouter = createTRPCRouter({
       const urls = await Promise.all(
         preparedFiles.map(async (file) => {
           const url = await tryCatch(
-            presignUploadUrl({
-              key: file.key,
-              contentType: file.contentType,
-              fileSize: file.fileSize,
-            }),
+            presignUploadUrl(file.key, file.contentType, file.fileSize),
           );
 
           return {

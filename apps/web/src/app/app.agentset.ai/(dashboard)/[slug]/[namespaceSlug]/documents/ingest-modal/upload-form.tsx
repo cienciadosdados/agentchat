@@ -44,6 +44,11 @@ export default function UploadForm({ onSuccess }: { onSuccess: () => void }) {
     defaultValues: {
       name: "",
       files: [],
+      chunkSize: undefined,
+      chunkOverlap: undefined,
+      metadata: undefined,
+      chunkingStrategy: "basic",
+      strategy: "auto",
     },
   });
 
@@ -56,39 +61,52 @@ export default function UploadForm({ onSuccess }: { onSuccess: () => void }) {
     }
   }, [files, setValue]);
 
-  const { onUpload, progresses, isUploading } = useUploadFiles({
+  const { onUpload, progresses, isUploading, uploadedFiles } = useUploadFiles({
     namespaceId: activeNamespace.id,
   });
 
   const { mutateAsync, isPending: isFilePending } = useMutation(
     trpc.ingestJob.ingest.mutationOptions({
-      onSuccess,
+      onSuccess: () => {
+        form.reset();
+        onSuccess();
+      },
     }),
   );
 
   const handleFileSubmit = async (data: z.infer<typeof schema>) => {
-    const uploadedFiles = await onUpload(data.files);
-    if (uploadedFiles.length === 0) return;
+    try {
+      const uploadedFiles = await onUpload(data.files);
+      if (uploadedFiles.length === 0) {
+        throw new Error("Nenhum arquivo foi enviado com sucesso");
+      }
 
-    await mutateAsync({
-      namespaceId: activeNamespace.id,
-      payload: {
-        type: "MANAGED_FILES",
-        name: data.name,
-        files: uploadedFiles,
-      },
-      config:
-        data.chunkSize || data.chunkOverlap || data.metadata
-          ? {
-              chunkSize: data.chunkSize,
-              chunkOverlap: data.chunkOverlap,
-              metadata: data.metadata,
-            }
-          : undefined,
-    });
+      await mutateAsync({
+        namespaceId: activeNamespace.id,
+        payload: {
+          type: "MANAGED_FILES",
+          name: data.name,
+          files: uploadedFiles,
+        },
+        config:
+          data.chunkSize || data.chunkOverlap || data.metadata
+            ? {
+                chunkSize: data.chunkSize,
+                chunkOverlap: data.chunkOverlap,
+                metadata: data.metadata,
+                chunkingStrategy: data.chunkingStrategy,
+                strategy: data.strategy,
+              }
+            : undefined,
+      });
+    } catch (error) {
+      console.error("Erro no envio:", error);
+      // O erro já é tratado no hook useUploadFiles
+    }
   };
 
   const isPending = isFilePending || isUploading;
+  const hasProgress = Object.keys(progresses).length > 0;
 
   return (
     <Form {...form}>
@@ -138,8 +156,15 @@ export default function UploadForm({ onSuccess }: { onSuccess: () => void }) {
         </div>
 
         <DialogFooter>
-          <Button type="submit" isLoading={isPending}>
-            Ingest Files
+          <Button type="submit" isLoading={isPending} disabled={isPending}>
+            {isUploading && hasProgress
+              ? `Enviando... ${Math.round(
+                  Object.values(progresses).reduce((a, b) => a + b, 0) /
+                    Object.keys(progresses).length
+                )}%`
+              : isFilePending
+              ? "Processando..."
+              : "Ingest Files"}
           </Button>
         </DialogFooter>
       </form>

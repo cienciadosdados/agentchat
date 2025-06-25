@@ -1,10 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { capitalize } from "@/lib/string-utils";
+import { useNamespace } from "@/contexts/namespace-context";
+import { useTRPC } from "@/trpc/react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { PlusIcon } from "lucide-react";
+import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { capitalize } from "@/lib/string-utils";
+import { PlusIcon } from "lucide-react";
 import { z } from "zod";
 
 import {
@@ -21,8 +25,10 @@ import {
   FormControl,
   FormField,
   FormItem,
+  FormLabel,
   FormMessage,
   GoogleDriveIcon,
+  Input,
   NotionIcon,
   OneDriveIcon,
   RadioButton,
@@ -31,66 +37,60 @@ import {
 } from "@agentset/ui";
 
 const formSchema = z.object({
-  connectorProvider: z.string(),
-  clientId: z.string(),
-  clientSecret: z.string(),
-  accessKey: z.string(),
-  secretKey: z.string(),
+  connectorProvider: z.string().min(1, "Please select a connector provider"),
+  clientId: z.string().optional(),
+  clientSecret: z.string().optional(),
+  accessKey: z.string().optional(),
+  secretKey: z.string().optional(),
 });
 
 const connectorProviders = [
-  { value: "s3", icon: S3Icon },
-  { value: "google_drive", icon: GoogleDriveIcon },
-  { value: "notion", icon: NotionIcon },
-  { value: "dropbox", icon: DropboxIcon },
-  { value: "onedrive", icon: OneDriveIcon },
+  { value: "s3", icon: S3Icon, label: "AWS S3" },
+  { value: "google_drive", icon: GoogleDriveIcon, label: "Google Drive" },
+  { value: "notion", icon: NotionIcon, label: "Notion" },
+  { value: "dropbox", icon: DropboxIcon, label: "Dropbox" },
+  { value: "onedrive", icon: OneDriveIcon, label: "OneDrive" },
 ];
 
 export default function AddConnector() {
-  const [selectedType, setSelectedType] = useState<string>("");
+  const { activeNamespace } = useNamespace();
+  const trpc = useTRPC();
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
+    defaultValues: {
+      connectorProvider: "",
+      clientId: "",
+      clientSecret: "",
+      accessKey: "",
+      secretKey: "",
+    },
   });
 
-  // when the provider changes, set the model to the default model for the provider
-  // const currentEmbeddingProvider = form.watch("connectorProvider")?.provider;
+  const { mutateAsync: createConnector, isPending } = useMutation(
+    trpc.connector.create.mutationOptions({
+      onSuccess: (data) => {
+        toast.success(`Conector ${data.name} adicionado com sucesso!`);
+        form.reset();
+        setIsAddModalOpen(false);
+        trpc.connector.list.invalidate({ namespaceId: activeNamespace.id });
+      },
+      onError: (error) => {
+        toast.error(`Erro ao adicionar conector: ${error.message}`);
+      },
+    }),
+  );
 
-  // useEffect(() => {
-  //   if (currentEmbeddingProvider) {
-  //     const model = embeddingModels.find(
-  //       (p) => p.value === currentEmbeddingProvider,
-  //     )?.models[0];
-
-  //     // reset other fields in the embeddingModel object
-  //     form.resetField("embeddingModel", {
-  //       defaultValue: {
-  //         provider: currentEmbeddingProvider,
-  //         model,
-  //       } as z.infer<typeof EmbeddingConfigSchema>,
-  //     });
-  //   } else {
-  //     form.setValue("embeddingModel", undefined);
-  //   }
-  //   // eslint-disable-next-line react-compiler/react-compiler
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [currentEmbeddingProvider]);
-
-  // const currentEmbeddingOptions = useMemo(() => {
-  //   const shape =
-  //     EmbeddingConfigSchema.optionsMap.get(currentEmbeddingProvider)?.shape ??
-  //     {};
-  //   return {
-  //     fields: Object.keys(shape).filter(
-  //       (key) => key !== "provider" && key !== "model",
-  //     ),
-  //     shape,
-  //   };
-  // }, [currentEmbeddingProvider]);
-
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
-    console.log(values);
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    try {
+      await createConnector({
+        namespaceId: activeNamespace.id,
+        connector: values,
+      });
+    } catch (error) {
+      console.error("Erro ao criar conector:", error);
+    }
   };
 
   return (
@@ -126,9 +126,7 @@ export default function AddConnector() {
                           <RadioButton
                             key={provider.value}
                             value={provider.value}
-                            label={
-                              capitalize(provider.value.split("_").join(" "))!
-                            }
+                            label={provider.label}
                             icon={provider.icon}
                           />
                         ))}
@@ -140,87 +138,80 @@ export default function AddConnector() {
                 )}
               />
 
-              {/* {currentEmbeddingProvider && (
-            <FormField
-              control={form.control}
-              name="embeddingModel.model"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Model</FormLabel>
-                  <FormControl>
-                    <Select
-                      defaultValue={field.value}
-                      value={field.value}
-                      onValueChange={field.onChange}
-                    >
-                      <SelectTrigger className="w-xs">
-                        <SelectValue placeholder="Select a model" />
-                      </SelectTrigger>
+              {form.watch("connectorProvider") === "s3" && (
+                <>
+                  <FormField
+                    control={form.control}
+                    name="accessKey"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Input {...field} placeholder="Enter AWS Access Key" />
+                        </FormControl>
 
-                      <SelectContent>
-                        {embeddingModels
-                          .find((p) => p.value === currentEmbeddingProvider)
-                          ?.models.map((model) => (
-                            <SelectItem key={model} value={model}>
-                              {model}
-                            </SelectItem>
-                          ))}
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                  <FormMessage />
-                </FormItem>
+                  <FormField
+                    control={form.control}
+                    name="secretKey"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            type="password"
+                            placeholder="Enter AWS Secret Key"
+                          />
+                        </FormControl>
+
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </>
               )}
-            />
-          )} */}
 
-              {/* render other fields based on the provider dynamically */}
-              {/* {currentEmbeddingProvider ? (
-            currentEmbeddingOptions.fields.map((key) => (
-              <FormField
-                key={key}
-                control={form.control}
-                name={
-                  `embeddingModel.${key}` as `embeddingModel.${keyof z.infer<typeof EmbeddingConfigSchema>}`
-                }
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      {camelCaseToWords(key)}{" "}
-                      {currentEmbeddingOptions.shape[
-                        key
-                      ]?.isOptional() ? null : (
-                        <span className="text-destructive-foreground">*</span>
-                      )}
-                    </FormLabel>
+              {form.watch("connectorProvider") === "google_drive" && (
+                <>
+                  <FormField
+                    control={form.control}
+                    name="clientId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            placeholder="Enter Google Drive Client ID"
+                          />
+                        </FormControl>
 
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            ))
-          ) : (
-            <div className="flex flex-col gap-2">
-              <Label data-slot="form-label">Model</Label>
+                  <FormField
+                    control={form.control}
+                    name="clientSecret"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            type="password"
+                            placeholder="Enter Google Drive Client Secret"
+                          />
+                        </FormControl>
 
-              <Select disabled value="default">
-                <SelectTrigger className="w-xs">
-                  <SelectValue placeholder="Select a model" />
-                </SelectTrigger>
-
-                <SelectContent>
-                  <SelectItem value="default">
-                    openai:text-embedding-3-large
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          )} */}
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </>
+              )}
             </div>
 
             <DialogFooter className="mt-10 flex-row items-center justify-between sm:justify-between">
@@ -244,66 +235,13 @@ export default function AddConnector() {
                 >
                   Cancel
                 </Button>
-                <Button type="submit">Add Connector</Button>
+                <Button type="submit" disabled={isPending}>
+                  Add Connector
+                </Button>
               </div>
             </DialogFooter>
           </form>
         </Form>
-
-        {/* <div className="space-y-4 py-4">
-          <div className="space-y-2">
-            <Label htmlFor="type">Connector Type</Label>
-            <Select value={selectedType} onValueChange={setSelectedType}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select a connector type" />
-              </SelectTrigger>
-              <SelectContent>
-                {connectorTypes.map((type) => (
-                  <SelectItem key={type.value} value={type.value}>
-                    {type.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {selectedType === "google_drive" && (
-            <div className="space-y-2">
-              <Label htmlFor="clientId">Client ID</Label>
-              <Input id="clientId" placeholder="Enter Google Drive Client ID" />
-              <Label htmlFor="clientSecret">Client Secret</Label>
-              <Input
-                id="clientSecret"
-                type="password"
-                placeholder="Enter Google Drive Client Secret"
-              />
-            </div>
-          )}
-
-          {selectedType === "s3" && (
-            <div className="space-y-2">
-              <Label htmlFor="accessKey">Access Key</Label>
-              <Input id="accessKey" placeholder="Enter AWS Access Key" />
-              <Label htmlFor="secretKey">Secret Key</Label>
-              <Input
-                id="secretKey"
-                type="password"
-                placeholder="Enter AWS Secret Key"
-              />
-              <Label htmlFor="bucket">Bucket Name</Label>
-              <Input id="bucket" placeholder="Enter S3 Bucket Name" />
-              <Label htmlFor="region">Region</Label>
-              <Input id="region" placeholder="Enter AWS Region" />
-            </div>
-          )}
-
-          <DialogFooter className="mt-4">
-            <Button variant="outline" onClick={() => setIsAddModalOpen(false)}>
-              Cancel
-            </Button>
-            <Button>Add Connector</Button>
-          </DialogFooter>
-        </div> */}
       </DialogContent>
     </Dialog>
   );

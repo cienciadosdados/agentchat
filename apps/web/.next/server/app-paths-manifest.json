@@ -1,0 +1,11 @@
+{
+  "/api/(internal-api)/auth/[...all]/route": "app/api/(internal-api)/auth/[...all]/route.js",
+  "/api/(internal-api)/chat/route": "app/api/(internal-api)/chat/route.js",
+  "/api/(internal-api)/trpc/[trpc]/route": "app/api/(internal-api)/trpc/[trpc]/route.js",
+  "/app.agentset.ai/(dashboard)/[slug]/[namespaceSlug]/playground/page": "app/app.agentset.ai/(dashboard)/[slug]/[namespaceSlug]/playground/page.js",
+  "/app.agentset.ai/(dashboard)/[slug]/[namespaceSlug]/quick-start/page": "app/app.agentset.ai/(dashboard)/[slug]/[namespaceSlug]/quick-start/page.js",
+  "/app.agentset.ai/(dashboard)/[slug]/page": "app/app.agentset.ai/(dashboard)/[slug]/page.js",
+  "/app.agentset.ai/(dashboard)/page": "app/app.agentset.ai/(dashboard)/page.js",
+  "/app.agentset.ai/login/page": "app/app.agentset.ai/login/page.js",
+  "/manifest.webmanifest/route": "app/manifest.webmanifest/route.js"
+}

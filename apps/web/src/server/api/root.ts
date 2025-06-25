@@ -2,6 +2,7 @@ import { createCallerFactory, createTRPCRouter } from "@/server/api/trpc";
 
 import { apiKeysRouter } from "./routers/api-keys";
 import { billingRouter } from "./routers/billing";
+import { connectorsRouter } from "./routers/connectors";
 import { documentsRouter } from "./routers/documents";
 import { domainsRouter } from "./routers/domains";
 import { hostingRouter } from "./routers/hosting";
@@ -22,6 +23,7 @@ export const appRouter = createTRPCRouter({
   hosting: hostingRouter,
   domain: domainsRouter,
   search: searchRouter,
+  connector: connectorsRouter,
 });
 
 // export type definition of API

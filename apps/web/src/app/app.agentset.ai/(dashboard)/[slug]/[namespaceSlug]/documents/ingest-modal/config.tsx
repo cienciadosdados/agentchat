@@ -43,7 +43,15 @@ export default function IngestConfig({
                 <FormItem>
                   <FormLabel>Chunk size (optional)</FormLabel>
                   <FormControl>
-                    <Input placeholder="512" {...field} />
+                    <Input 
+                      placeholder="512" 
+                      type="number"
+                      value={field.value ?? ""}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        field.onChange(value === "" ? undefined : Number(value));
+                      }}
+                    />
                   </FormControl>
 
                   <FormMessage />
@@ -58,7 +66,15 @@ export default function IngestConfig({
                 <FormItem>
                   <FormLabel>Chunk overlap (optional)</FormLabel>
                   <FormControl>
-                    <Input placeholder="32" {...field} />
+                    <Input 
+                      placeholder="32" 
+                      type="number"
+                      value={field.value ?? ""}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        field.onChange(value === "" ? undefined : Number(value));
+                      }}
+                    />
                   </FormControl>
 
                   <FormMessage />
@@ -75,7 +91,7 @@ export default function IngestConfig({
                   <FormControl>
                     <Select
                       onValueChange={field.onChange}
-                      defaultValue={field.value ?? "basic"}
+                      value={field.value ?? "basic"}
                     >
                       <SelectTrigger className="w-full">
                         <SelectValue placeholder="Select a strategy" />
@@ -102,7 +118,7 @@ export default function IngestConfig({
                   <FormControl>
                     <Select
                       onValueChange={field.onChange}
-                      defaultValue={field.value ?? "auto"}
+                      value={field.value ?? "auto"}
                     >
                       <SelectTrigger className="w-full">
                         <SelectValue placeholder="Select a strategy" />

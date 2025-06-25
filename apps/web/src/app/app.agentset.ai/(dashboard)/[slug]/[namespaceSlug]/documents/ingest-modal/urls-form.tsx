@@ -38,7 +38,13 @@ export default function UrlsForm({ onSuccess }: { onSuccess: () => void }) {
   const form = useForm<z.infer<typeof schema>>({
     resolver: zodResolver(schema),
     defaultValues: {
+      name: "",
       urls: [""],
+      chunkSize: undefined,
+      chunkOverlap: undefined,
+      metadata: undefined,
+      chunkingStrategy: "basic",
+      strategy: "auto",
     },
   });
 

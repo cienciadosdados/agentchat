@@ -1,9 +1,12 @@
 "use client";
 
+import { useNamespace } from "@/contexts/namespace-context";
+import { useTRPC } from "@/trpc/react";
 import { DeleteConfirmation } from "@/components/delete-confirmation";
 import { TrashIcon } from "lucide-react";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { toast } from "sonner";
 
-// import { Skeleton } from "@agentset/ui";
 import {
   Button,
   Card,
@@ -12,41 +15,68 @@ import {
   CardHeader,
   CardTitle,
   cn,
+  Skeleton,
 } from "@agentset/ui";
 
-// Mock data for connectors
-const mockConnectors = [
-  {
-    id: "1",
-    name: "Google Drive",
-    type: "google_drive",
-    status: "connected",
-    lastSync: "2024-03-20T10:00:00Z",
-  },
-  {
-    id: "2",
-    name: "AWS S3",
-    type: "s3",
-    status: "connected",
-    lastSync: "2024-03-19T15:30:00Z",
-  },
-  {
-    id: "3",
-    name: "Dropbox",
-    type: "dropbox",
-    status: "disconnected",
-    lastSync: "2024-03-18T12:00:00Z",
-  },
-];
-
 export default function ConnectorsPage() {
+  const { activeNamespace } = useNamespace();
+  const trpc = useTRPC();
+
+  const { data: connectors, isLoading, refetch } = useQuery(
+    trpc.connector.list.queryOptions({
+      namespaceId: activeNamespace.id,
+    }),
+  );
+
+  const { mutateAsync: deleteConnector } = useMutation(
+    trpc.connector.delete.mutationOptions({
+      onSuccess: () => {
+        toast.success("Conector removido com sucesso!");
+        refetch();
+      },
+      onError: (error) => {
+        toast.error(`Erro ao remover conector: ${error.message}`);
+      },
+    }),
+  );
+
+  const handleDeleteConnector = async (connectorId: string) => {
+    try {
+      await deleteConnector({
+        namespaceId: activeNamespace.id,
+        connectorId,
+      });
+    } catch (error) {
+      console.error("Erro ao deletar conector:", error);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-3 gap-4">
+        <ConnectorSkeleton />
+        <ConnectorSkeleton />
+        <ConnectorSkeleton />
+      </div>
+    );
+  }
+
+  if (!connectors || connectors.length === 0) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-muted-foreground">
+          Nenhum conector configurado ainda.
+        </p>
+        <p className="text-sm text-muted-foreground mt-2">
+          Clique em "Add Connector" para começar.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="grid grid-cols-3 gap-4">
-      {/* <ConnectorSkeleton />
-      <ConnectorSkeleton />
-      <ConnectorSkeleton /> */}
-
-      {mockConnectors.map((connector) => (
+      {connectors.map((connector) => (
         <Card key={connector.id}>
           <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
             <div>
@@ -59,13 +89,11 @@ export default function ConnectorsPage() {
             <DeleteConfirmation
               trigger={
                 <Button variant="ghost" size="icon">
-                  <TrashIcon className="h-4 w-4" />{" "}
+                  <TrashIcon className="h-4 w-4" />
                 </Button>
               }
               confirmText={connector.name}
-              onConfirm={() => {
-                console.log("delete connector");
-              }}
+              onConfirm={() => handleDeleteConnector(connector.id)}
             />
           </CardHeader>
 
@@ -90,27 +118,27 @@ export default function ConnectorsPage() {
   );
 }
 
-// const ConnectorSkeleton = () => {
-//   return (
-//     <Card>
-//       <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
-//         <div className="flex flex-col">
-//           <Skeleton className="h-4 w-24" />
+const ConnectorSkeleton = () => {
+  return (
+    <Card>
+      <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
+        <div className="flex flex-col">
+          <Skeleton className="h-4 w-24" />
 
-//           <CardDescription className="mt-1">
-//             <Skeleton className="h-4 w-48" />
-//           </CardDescription>
-//         </div>
+          <CardDescription className="mt-1">
+            <Skeleton className="h-4 w-48" />
+          </CardDescription>
+        </div>
 
-//         <Skeleton className="h-6 w-6" />
-//       </CardHeader>
+        <Skeleton className="h-6 w-6" />
+      </CardHeader>
 
-//       <CardContent>
-//         <div className="flex items-center space-x-2">
-//           <Skeleton className="h-2 w-2 rounded-full" />
-//           <Skeleton className="h-2 w-24 rounded-full" />
-//         </div>
-//       </CardContent>
-//     </Card>
-//   );
-// };
+      <CardContent>
+        <div className="flex items-center space-x-2">
+          <Skeleton className="h-2 w-2 rounded-full" />
+          <Skeleton className="h-2 w-24 rounded-full" />
+        </div>
+      </CardContent>
+    </Card>
+  );
+};

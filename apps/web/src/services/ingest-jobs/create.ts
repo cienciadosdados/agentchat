@@ -1,6 +1,6 @@
 import { triggerIngestionJob } from "@/lib/workflow";
 
-import type { IngestJob } from "@agentset/db";
+import type { IngestJob, PrismaJson } from "@agentset/db";
 import { db, IngestJobStatus } from "@agentset/db";
 
 // Helper function - Uploadthing doesn't have file existence check

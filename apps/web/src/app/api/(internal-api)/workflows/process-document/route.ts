@@ -60,6 +60,14 @@ const partitionDocument = async (
   partitionBody: PartitionBody,
   context: WorkflowContext<TriggerDocumentJobBody>,
 ) => {
+  // Check if Partition API is configured
+  if (env.PARTITION_API_KEY === "not_configured") {
+    return {
+      result: null,
+      error: "Partition API not configured",
+    };
+  }
+
   const { body, status } = await context.call<{ call_id: string } | undefined>(
     "partition-document",
     {

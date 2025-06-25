@@ -1,0 +1,14 @@
+{
+  "/_not-found/page": "app/_not-found/page.js",
+  "/api/(internal-api)/auth/[...all]/route": "app/api/(internal-api)/auth/[...all]/route.js",
+  "/api/(internal-api)/trpc/[trpc]/route": "app/api/(internal-api)/trpc/[trpc]/route.js",
+  "/app.agentset.ai/(dashboard)/[slug]/[namespaceSlug]/documents/page": "app/app.agentset.ai/(dashboard)/[slug]/[namespaceSlug]/documents/page.js",
+  "/app.agentset.ai/(dashboard)/[slug]/[namespaceSlug]/quick-start/page": "app/app.agentset.ai/(dashboard)/[slug]/[namespaceSlug]/quick-start/page.js",
+  "/app.agentset.ai/(dashboard)/[slug]/billing/page": "app/app.agentset.ai/(dashboard)/[slug]/billing/page.js",
+  "/app.agentset.ai/(dashboard)/[slug]/page": "app/app.agentset.ai/(dashboard)/[slug]/page.js",
+  "/app.agentset.ai/(dashboard)/[slug]/settings/api-keys/page": "app/app.agentset.ai/(dashboard)/[slug]/settings/api-keys/page.js",
+  "/app.agentset.ai/(dashboard)/[slug]/settings/page": "app/app.agentset.ai/(dashboard)/[slug]/settings/page.js",
+  "/app.agentset.ai/(dashboard)/[slug]/team/page": "app/app.agentset.ai/(dashboard)/[slug]/team/page.js",
+  "/app.agentset.ai/(dashboard)/page": "app/app.agentset.ai/(dashboard)/page.js",
+  "/manifest.webmanifest/route": "app/manifest.webmanifest/route.js"
+}

@@ -1,10 +1,16 @@
-import { extname } from "node:path";
-import { tryCatch } from "@/lib/error";
-import { filenamize } from "@/lib/string-utils";
-import { MAX_UPLOAD_SIZE } from "@/lib/upload";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+import { extname } from "path";
+
+// Implementação simples para substituir o pacote filenamize
+function filenamize(input: string): string {
+  return input
+    .replace(/[^a-zA-Z0-9_\-]/g, '_') // Substitui caracteres não alfanuméricos por underscores
+    .replace(/_{2,}/g, '_') // Remove underscores duplicados
+    .replace(/^_|_$/g, '') // Remove underscores no início e fim
+    .toLowerCase();
+}
 
 import { getNamespaceByUser } from "../auth";
 
@@ -39,12 +45,9 @@ const supportedExtensions = [
 ];
 
 // Helper function to generate upload URL for Uploadthing
-// In practice, this would be handled by the Uploadthing component on the frontend
 const presignUploadUrl = async (key: string, contentType: string, fileSize: number) => {
-  // Uploadthing handles presigned URLs internally
-  // This is a placeholder - actual upload should use Uploadthing components
   return {
-    data: `/api/uploadthing`,
+    data: `/api/uploadthing?slug=documentUploader`,
     error: null,
   };
 };
@@ -56,7 +59,7 @@ export const uploadsRouter = createTRPCRouter({
         namespaceId: z.string(),
         fileName: z.string(),
         contentType: z.string(),
-        fileSize: z.number().min(1).max(MAX_UPLOAD_SIZE),
+        fileSize: z.number().min(1).max(1000000000),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -80,13 +83,7 @@ export const uploadsRouter = createTRPCRouter({
       }
 
       const key = `namespaces/${ns.id}/${filename}${ext}`;
-      const url = await tryCatch(
-        presignUploadUrl(key, input.contentType, input.fileSize),
-      );
-
-      if (url.error) {
-        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
-      }
+      const url = await presignUploadUrl(key, input.contentType, input.fileSize);
 
       return {
         url: url.data,
@@ -102,7 +99,7 @@ export const uploadsRouter = createTRPCRouter({
             z.object({
               fileName: z.string(),
               contentType: z.string(),
-              fileSize: z.number().min(1).max(MAX_UPLOAD_SIZE),
+              fileSize: z.number().min(1).max(1000000000),
             }),
           )
           .min(1, { message: "At least one file is required" })
@@ -142,24 +139,15 @@ export const uploadsRouter = createTRPCRouter({
 
       const urls = await Promise.all(
         preparedFiles.map(async (file) => {
-          const url = await tryCatch(
-            presignUploadUrl(file.key, file.contentType, file.fileSize),
-          );
+          const urlResult = await presignUploadUrl(file.key, file.contentType, file.fileSize);
 
           return {
-            url,
+            url: urlResult.data,
             key: file.key,
           };
         }),
       );
 
-      if (urls.some((url) => url.url.error)) {
-        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
-      }
-
-      return urls.map((url) => ({
-        url: url.url.data!,
-        key: url.key,
-      }));
+      return urls;
     }),
 });

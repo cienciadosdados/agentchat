@@ -28,7 +28,19 @@ export function useJobs() {
         cursor,
         cursorDirection,
       },
-      { refetchInterval: 15_000, placeholderData: keepPreviousData }, // Refetch every 15 seconds
+      { 
+        refetchInterval: (data) => {
+          // Refetch mais frequentemente se houver jobs em andamento
+          const hasActiveJobs = data?.items?.some(job => 
+            job.status === IngestJobStatus.QUEUED || 
+            job.status === IngestJobStatus.PROCESSING
+          );
+          return hasActiveJobs ? 5_000 : 15_000; // 5s para jobs ativos, 15s para outros
+        },
+        placeholderData: keepPreviousData,
+        refetchOnWindowFocus: true,
+        refetchOnMount: true,
+      },
     ),
   );
 

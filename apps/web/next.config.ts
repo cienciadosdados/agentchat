@@ -9,14 +9,12 @@ import "./src/env";
 const config: NextConfig = {
   // Performance optimizations
   experimental: {
-    // Enable SWC minification for better performance
-    swcMinify: true,
-    // Enable concurrent features
-    concurrentFeatures: true,
-    // Optimize server components
-    serverComponentsExternalPackages: ["@prisma/client"],
     // Enable turbo mode for faster builds
   },
+  // Edge Runtime configuration
+  runtime: 'edge',
+  // External packages for server components
+  serverExternalPackages: ["@prisma/client"],
 
   // Compiler optimizations
   compiler: {
@@ -75,6 +73,22 @@ const config: NextConfig = {
     "@agentset/validation",
     "@agentset/ui",
   ],
+
+
+  // TRPC Edge Runtime configuration
+  async headers() {
+    return [
+      {
+        source: '/api/trpc/:path*',
+        headers: [
+          { key: 'Access-Control-Allow-Credentials', value: 'true' },
+          { key: 'Access-Control-Allow-Origin', value: '*' },
+          { key: 'Access-Control-Allow-Methods', value: 'GET,OPTIONS,PATCH,DELETE,POST,PUT' },
+          { key: 'Access-Control-Allow-Headers', value: 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version' },
+        ],
+      },
+    ];
+  },
 
   // Output optimizations
   output: "standalone",
